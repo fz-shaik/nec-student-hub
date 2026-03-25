@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Search, ChevronDown, BookOpen, ClipboardCheck, IndianRupee, FolderGit2, GraduationCap, User, UserRound, Phone, MapPin, Building2, BadgeCheck, Calendar, Mail } from "lucide-react";
+import { ArrowLeft, Search, ChevronDown, BookOpen, ClipboardCheck, IndianRupee, FolderGit2, GraduationCap, User, UserRound, Phone, MapPin, Building2, BadgeCheck, Calendar, Mail, Users, UserCheck, UserX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 
@@ -223,6 +223,9 @@ const StudentsPage = () => {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           </div>
         </div>
+
+        {/* Branch-wise Attendance Summary */}
+        <AttendanceSummary students={filtered} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((student, i) => (
