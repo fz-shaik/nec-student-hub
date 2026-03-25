@@ -178,6 +178,102 @@ const ProfileAvatar = ({ gender, size = "md" }: { gender: "Male" | "Female"; siz
   );
 };
 
+// Branch-wise attendance summary
+const branchStrengths: Record<string, number> = {
+  CSE: 480, ECE: 360, EEE: 240, MECH: 300, CIVIL: 180, IT: 240,
+  CHEM: 120, MBA: 120, "CSE-AIML": 180, "CSE-DS": 180, AGRI: 60, "CSE-CS": 120,
+};
+
+const AttendanceSummary = ({ students }: { students: StudentRecord[] }) => {
+  const branchData = useMemo(() => {
+    const branches = [...new Set(students.map((s) => s.dept))];
+    return branches.map((dept) => {
+      const deptStudents = students.filter((s) => s.dept === dept);
+      const totalStrength = branchStrengths[dept] || deptStudents.length;
+      const present = deptStudents.filter((s) => s.attendance >= 75).length;
+      const presentScaled = Math.round((present / Math.max(deptStudents.length, 1)) * totalStrength);
+      const absent = totalStrength - presentScaled;
+      return { dept, total: totalStrength, present: presentScaled, absent };
+    });
+  }, [students]);
+
+  const totals = useMemo(() => {
+    const total = branchData.reduce((a, b) => a + b.total, 0);
+    const present = branchData.reduce((a, b) => a + b.present, 0);
+    return { total, present, absent: total - present };
+  }, [branchData]);
+
+  return (
+    <div className="mb-6 space-y-4">
+      {/* Overall stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-xl p-4 border border-border shadow-card text-center">
+          <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center mx-auto mb-2">
+            <Users className="w-5 h-5 text-secondary" />
+          </div>
+          <p className="text-2xl font-bold text-foreground">{totals.total}</p>
+          <p className="text-xs text-muted-foreground">Total Strength</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-xl p-4 border border-border shadow-card text-center">
+          <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center mx-auto mb-2">
+            <UserCheck className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-2xl font-bold text-green-600">{totals.present}</p>
+          <p className="text-xs text-muted-foreground">Total Present</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-xl p-4 border border-border shadow-card text-center">
+          <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center mx-auto mb-2">
+            <UserX className="w-5 h-5 text-red-600" />
+          </div>
+          <p className="text-2xl font-bold text-red-600">{totals.absent}</p>
+          <p className="text-xs text-muted-foreground">Total Absent</p>
+        </motion.div>
+      </div>
+
+      {/* Branch-wise breakdown */}
+      <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
+        <div className="px-5 py-3 border-b border-border">
+          <h3 className="font-display font-bold text-foreground text-sm">Branch-wise Attendance Overview</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-primary/5">
+                <th className="text-left px-5 py-2 font-semibold text-foreground">Branch</th>
+                <th className="text-center px-5 py-2 font-semibold text-foreground">Strength</th>
+                <th className="text-center px-5 py-2 font-semibold text-green-600">Present</th>
+                <th className="text-center px-5 py-2 font-semibold text-red-600">Absent</th>
+                <th className="text-center px-5 py-2 font-semibold text-foreground">Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {branchData.map((b) => {
+                const rate = Math.round((b.present / b.total) * 100);
+                return (
+                  <tr key={b.dept} className="border-t border-border hover:bg-muted/50 transition-colors">
+                    <td className="px-5 py-2 font-semibold text-foreground">{b.dept}</td>
+                    <td className="px-5 py-2 text-center text-muted-foreground">{b.total}</td>
+                    <td className="px-5 py-2 text-center font-semibold text-green-600">{b.present}</td>
+                    <td className="px-5 py-2 text-center font-semibold text-red-600">{b.absent}</td>
+                    <td className="px-5 py-2 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-16 bg-muted rounded-full h-1.5">
+                          <div className={`h-1.5 rounded-full ${rate >= 75 ? "bg-green-500" : "bg-red-500"}`} style={{ width: `${rate}%` }} />
+                        </div>
+                        <span className="text-xs font-bold text-foreground">{rate}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const StudentsPage = () => {
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
