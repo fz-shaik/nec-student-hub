@@ -1,16 +1,31 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const navItems = ["Home", "Departments", "Students", "Notices", "Contact"];
+const pageRoutes: Record<string, string> = { Departments: "/departments", Students: "/students" };
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const scrollTo = (id: string) => {
+    setIsOpen(false);
+    if (pageRoutes[id]) {
+      navigate(pageRoutes[id]);
+      return;
+    }
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+      return;
+    }
     const el = document.getElementById(id.toLowerCase());
     el?.scrollIntoView({ behavior: "smooth" });
-    setIsOpen(false);
   };
 
   return (
