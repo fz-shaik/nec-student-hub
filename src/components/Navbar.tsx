@@ -4,7 +4,7 @@ import { GraduationCap, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const navItems = ["Home", "Departments", "Students", "Notices", "Placements", "Contact"];
-const pageRoutes: Record<string, string> = { Departments: "/departments", Students: "/students" };
+const pageRoutes: Record<string, string> = { Departments: "/departments", Students: "/students", Notices: "/notices", Placements: "/placements" };
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
