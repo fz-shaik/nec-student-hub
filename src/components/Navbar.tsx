@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const navItems = ["Home", "Departments", "Students", "Notices", "Contact"];
+const navItems = ["Home", "Departments", "Students", "Notices", "Placements", "Contact"];
 const pageRoutes: Record<string, string> = { Departments: "/departments", Students: "/students" };
 
 const Navbar = () => {
