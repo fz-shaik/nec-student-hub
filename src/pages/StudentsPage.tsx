@@ -178,24 +178,36 @@ const ProfileAvatar = ({ gender, size = "md" }: { gender: "Male" | "Female"; siz
   );
 };
 
-// Branch-wise attendance summary
+// Branch-wise attendance summary — total strength = 10,000
 const branchStrengths: Record<string, number> = {
-  CSE: 480, ECE: 360, EEE: 240, MECH: 300, CIVIL: 180, IT: 240,
-  CHEM: 120, MBA: 120, "CSE-AIML": 180, "CSE-DS": 180, AGRI: 60, "CSE-CS": 120,
+  CSE: 1800, ECE: 1200, EEE: 800, MECH: 1000, CIVIL: 700, IT: 900,
+  CHEM: 500, MBA: 600, "CSE-AIML": 900, "CSE-DS": 700, AGRI: 300, "CSE-CS": 500,
+};
+
+// Generates a daily-seeded pseudo-random attendance rate per branch
+const getDailyAttendance = (dept: string) => {
+  const today = new Date();
+  const daySeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  let hash = daySeed;
+  for (let i = 0; i < dept.length; i++) {
+    hash = ((hash << 5) - hash + dept.charCodeAt(i)) | 0;
+  }
+  // Rate between 72% and 95%
+  const rate = 72 + Math.abs(hash % 24);
+  return rate;
 };
 
 const AttendanceSummary = ({ students }: { students: StudentRecord[] }) => {
   const branchData = useMemo(() => {
-    const branches = [...new Set(students.map((s) => s.dept))];
-    return branches.map((dept) => {
-      const deptStudents = students.filter((s) => s.dept === dept);
-      const totalStrength = branchStrengths[dept] || deptStudents.length;
-      const present = deptStudents.filter((s) => s.attendance >= 75).length;
-      const presentScaled = Math.round((present / Math.max(deptStudents.length, 1)) * totalStrength);
-      const absent = totalStrength - presentScaled;
-      return { dept, total: totalStrength, present: presentScaled, absent };
+    const allDepts = Object.keys(branchStrengths);
+    return allDepts.map((dept) => {
+      const total = branchStrengths[dept];
+      const rate = getDailyAttendance(dept);
+      const present = Math.round((rate / 100) * total);
+      const absent = total - present;
+      return { dept, total, present, absent, rate };
     });
-  }, [students]);
+  }, []);
 
   const totals = useMemo(() => {
     const total = branchData.reduce((a, b) => a + b.total, 0);
